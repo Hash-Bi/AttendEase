@@ -2,13 +2,18 @@ import { Student, AttendanceRecord, User } from '../types';
 import { students, attendanceRecords, users } from '../data/mockData';
 
 const ATTENDANCE_STORAGE_KEY = 'attendance_records';
+const STUDENTS_STORAGE_KEY = 'students_data';
 
 class DataService {
   private attendanceData: AttendanceRecord[];
+  private studentsData: Student[];
 
   constructor() {
-    const stored = localStorage.getItem(ATTENDANCE_STORAGE_KEY);
-    this.attendanceData = stored ? JSON.parse(stored) : [...attendanceRecords];
+    const storedAttendance = localStorage.getItem(ATTENDANCE_STORAGE_KEY);
+    this.attendanceData = storedAttendance ? JSON.parse(storedAttendance) : [...attendanceRecords];
+
+    const storedStudents = localStorage.getItem(STUDENTS_STORAGE_KEY);
+    this.studentsData = storedStudents ? JSON.parse(storedStudents) : [...students];
   }
 
   private saveAttendance() {
@@ -18,17 +23,24 @@ class DataService {
     );
   }
 
+  private saveStudents() {
+    localStorage.setItem(
+      STUDENTS_STORAGE_KEY,
+      JSON.stringify(this.studentsData)
+    );
+  }
+
   getStudents(userId: string, userRole: string, userDepartment?: string): Student[] {
     if (userRole === 'principal') {
-      return students;
+      return this.studentsData;
     }
 
     if (userRole === 'hod' && userDepartment) {
-      return students.filter((s) => s.department === userDepartment);
+      return this.studentsData.filter((s) => s.department === userDepartment);
     }
 
     if (userRole === 'advisor') {
-      return students.filter((s) => s.advisorId === userId);
+      return this.studentsData.filter((s) => s.advisorId === userId);
     }
 
     return [];
@@ -51,14 +63,14 @@ class DataService {
     }
 
     if (userRole === 'hod' && userDepartment) {
-      const deptStudentIds = students
+      const deptStudentIds = this.studentsData
         .filter((s) => s.department === userDepartment)
         .map((s) => s.id);
       return records.filter((r) => deptStudentIds.includes(r.studentId));
     }
 
     if (userRole === 'advisor') {
-      const advisorStudentIds = students
+      const advisorStudentIds = this.studentsData
         .filter((s) => s.advisorId === userId)
         .map((s) => s.id);
       return records.filter((r) => advisorStudentIds.includes(r.studentId));
@@ -120,6 +132,52 @@ class DataService {
   getAdvisorName(advisorId: string): string {
     const advisor = users.find((u) => u.id === advisorId);
     return advisor?.fullName || 'Unknown';
+  }
+
+  addStudent(student: Omit<Student, 'id'>): Student {
+    const newStudent: Student = {
+      ...student,
+      id: `s${Date.now()}`,
+    };
+
+    this.studentsData.push(newStudent);
+    this.saveStudents();
+    return newStudent;
+  }
+
+  updateStudent(studentId: string, updates: Partial<Omit<Student, 'id'>>): Student | null {
+    const index = this.studentsData.findIndex((s) => s.id === studentId);
+
+    if (index === -1) {
+      return null;
+    }
+
+    this.studentsData[index] = {
+      ...this.studentsData[index],
+      ...updates,
+    };
+
+    this.saveStudents();
+    return this.studentsData[index];
+  }
+
+  deleteStudent(studentId: string): boolean {
+    const index = this.studentsData.findIndex((s) => s.id === studentId);
+
+    if (index === -1) {
+      return false;
+    }
+
+    this.studentsData.splice(index, 1);
+    this.attendanceData = this.attendanceData.filter((a) => a.studentId !== studentId);
+
+    this.saveStudents();
+    this.saveAttendance();
+    return true;
+  }
+
+  getStudent(studentId: string): Student | null {
+    return this.studentsData.find((s) => s.id === studentId) || null;
   }
 }
 

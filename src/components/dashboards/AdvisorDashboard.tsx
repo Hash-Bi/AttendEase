@@ -3,12 +3,14 @@ import { Users, CheckCircle, XCircle, Clock, Calendar } from 'lucide-react';
 import { Header } from '../shared/Header';
 import { StatsCard } from '../shared/StatsCard';
 import { AttendanceMarker } from '../attendance/AttendanceMarker';
+import { StudentManagement } from '../students/StudentManagement';
 import { dataService } from '../../services/dataService';
 import { useAuth } from '../../context/AuthContext';
 
 export function AdvisorDashboard() {
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const myStudents = dataService.getStudents(user!.id, user!.role, user!.department);
   const todayAttendance = dataService.getAttendanceRecords(
@@ -38,6 +40,10 @@ export function AdvisorDashboard() {
     };
   });
 
+  const handleStudentChange = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Header />
@@ -45,7 +51,7 @@ export function AdvisorDashboard() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-slate-900">Advisor Dashboard</h2>
-          <p className="text-slate-600 mt-1">Manage attendance for your assigned students</p>
+          <p className="text-slate-600 mt-1">Manage students and attendance for your assigned class</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -73,6 +79,15 @@ export function AdvisorDashboard() {
             value={lateCount}
             icon={Clock}
             color="amber"
+          />
+        </div>
+
+        <div className="mb-8">
+          <StudentManagement
+            key={refreshKey}
+            advisorId={user!.id}
+            department={user!.department!}
+            onStudentChange={handleStudentChange}
           />
         </div>
 
