@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { UserPlus, Edit2, Trash2, X, Save } from 'lucide-react';
+import { UserPlus, CreditCard as Edit2, Trash2, X, Save } from 'lucide-react';
 import { dataService } from '../../services/dataService';
 import { User } from '../../types';
 

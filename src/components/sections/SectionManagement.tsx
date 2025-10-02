@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FolderPlus, Edit2, Trash2, X, Save } from 'lucide-react';
+import { FolderPlus, CreditCard as Edit2, Trash2, X, Save } from 'lucide-react';
 import { dataService } from '../../services/dataService';
 import { Section } from '../../types';
 
