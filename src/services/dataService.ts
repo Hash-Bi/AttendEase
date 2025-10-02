@@ -1,12 +1,16 @@
-import { Student, AttendanceRecord, User } from '../types';
-import { students, attendanceRecords, users } from '../data/mockData';
+import { Student, AttendanceRecord, User, Section } from '../types';
+import { students, attendanceRecords, users, sections } from '../data/mockData';
 
 const ATTENDANCE_STORAGE_KEY = 'attendance_records';
 const STUDENTS_STORAGE_KEY = 'students_data';
+const USERS_STORAGE_KEY = 'users_data';
+const SECTIONS_STORAGE_KEY = 'sections_data';
 
 class DataService {
   private attendanceData: AttendanceRecord[];
   private studentsData: Student[];
+  private usersData: User[];
+  private sectionsData: Section[];
 
   constructor() {
     const storedAttendance = localStorage.getItem(ATTENDANCE_STORAGE_KEY);
@@ -14,6 +18,12 @@ class DataService {
 
     const storedStudents = localStorage.getItem(STUDENTS_STORAGE_KEY);
     this.studentsData = storedStudents ? JSON.parse(storedStudents) : [...students];
+
+    const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+    this.usersData = storedUsers ? JSON.parse(storedUsers) : [...users];
+
+    const storedSections = localStorage.getItem(SECTIONS_STORAGE_KEY);
+    this.sectionsData = storedSections ? JSON.parse(storedSections) : [...sections];
   }
 
   private saveAttendance() {
@@ -27,6 +37,20 @@ class DataService {
     localStorage.setItem(
       STUDENTS_STORAGE_KEY,
       JSON.stringify(this.studentsData)
+    );
+  }
+
+  private saveUsers() {
+    localStorage.setItem(
+      USERS_STORAGE_KEY,
+      JSON.stringify(this.usersData)
+    );
+  }
+
+  private saveSections() {
+    localStorage.setItem(
+      SECTIONS_STORAGE_KEY,
+      JSON.stringify(this.sectionsData)
     );
   }
 
@@ -130,8 +154,128 @@ class DataService {
   }
 
   getAdvisorName(advisorId: string): string {
-    const advisor = users.find((u) => u.id === advisorId);
+    const advisor = this.usersData.find((u) => u.id === advisorId);
     return advisor?.fullName || 'Unknown';
+  }
+
+  getAdvisors(department?: string): User[] {
+    if (department) {
+      return this.usersData.filter((u) => u.role === 'advisor' && u.department === department);
+    }
+    return this.usersData.filter((u) => u.role === 'advisor');
+  }
+
+  addAdvisor(advisor: Omit<User, 'id'>): User {
+    const newAdvisor: User = {
+      ...advisor,
+      id: `u${Date.now()}`,
+      role: 'advisor',
+    };
+
+    this.usersData.push(newAdvisor);
+    this.saveUsers();
+    return newAdvisor;
+  }
+
+  updateAdvisor(advisorId: string, updates: Partial<Omit<User, 'id' | 'role'>>): User | null {
+    const index = this.usersData.findIndex((u) => u.id === advisorId && u.role === 'advisor');
+
+    if (index === -1) {
+      return null;
+    }
+
+    this.usersData[index] = {
+      ...this.usersData[index],
+      ...updates,
+    };
+
+    this.saveUsers();
+    return this.usersData[index];
+  }
+
+  deleteAdvisor(advisorId: string): boolean {
+    const index = this.usersData.findIndex((u) => u.id === advisorId && u.role === 'advisor');
+
+    if (index === -1) {
+      return false;
+    }
+
+    this.usersData.splice(index, 1);
+    this.sectionsData = this.sectionsData.filter((s) => s.advisorId !== advisorId);
+    this.studentsData.forEach((student) => {
+      if (student.advisorId === advisorId) {
+        student.advisorId = '';
+      }
+    });
+
+    this.saveUsers();
+    this.saveSections();
+    this.saveStudents();
+    return true;
+  }
+
+  getSections(department?: string, year?: number): Section[] {
+    let filtered = this.sectionsData;
+
+    if (department) {
+      filtered = filtered.filter((s) => s.department === department);
+    }
+
+    if (year !== undefined) {
+      filtered = filtered.filter((s) => s.year === year);
+    }
+
+    return filtered;
+  }
+
+  getSection(sectionId: string): Section | null {
+    return this.sectionsData.find((s) => s.id === sectionId) || null;
+  }
+
+  addSection(section: Omit<Section, 'id'>): Section {
+    const newSection: Section = {
+      ...section,
+      id: `sec${Date.now()}`,
+    };
+
+    this.sectionsData.push(newSection);
+    this.saveSections();
+    return newSection;
+  }
+
+  updateSection(sectionId: string, updates: Partial<Omit<Section, 'id'>>): Section | null {
+    const index = this.sectionsData.findIndex((s) => s.id === sectionId);
+
+    if (index === -1) {
+      return null;
+    }
+
+    this.sectionsData[index] = {
+      ...this.sectionsData[index],
+      ...updates,
+    };
+
+    this.saveSections();
+    return this.sectionsData[index];
+  }
+
+  deleteSection(sectionId: string): boolean {
+    const index = this.sectionsData.findIndex((s) => s.id === sectionId);
+
+    if (index === -1) {
+      return false;
+    }
+
+    this.sectionsData.splice(index, 1);
+    this.studentsData.forEach((student) => {
+      if (student.sectionId === sectionId) {
+        student.sectionId = undefined;
+      }
+    });
+
+    this.saveSections();
+    this.saveStudents();
+    return true;
   }
 
   addStudent(student: Omit<Student, 'id'>): Student {

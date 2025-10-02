@@ -1,4 +1,4 @@
-import { User, Student, AttendanceRecord } from '../types';
+import { User, Student, AttendanceRecord, Section } from '../types';
 
 export const users: User[] = [
   {
@@ -50,6 +50,30 @@ export const users: User[] = [
   },
 ];
 
+export const sections: Section[] = [
+  {
+    id: 'sec1',
+    name: 'Section A',
+    department: 'Computer Science',
+    year: 3,
+    advisorId: '4',
+  },
+  {
+    id: 'sec2',
+    name: 'Section B',
+    department: 'Computer Science',
+    year: 2,
+    advisorId: '5',
+  },
+  {
+    id: 'sec3',
+    name: 'Section A',
+    department: 'Electrical Engineering',
+    year: 3,
+    advisorId: '6',
+  },
+];
+
 export const students: Student[] = [
   {
     id: 's1',
@@ -58,6 +82,7 @@ export const students: Student[] = [
     department: 'Computer Science',
     year: 3,
     advisorId: '4',
+    sectionId: 'sec1',
   },
   {
     id: 's2',
@@ -66,6 +91,7 @@ export const students: Student[] = [
     department: 'Computer Science',
     year: 3,
     advisorId: '4',
+    sectionId: 'sec1',
   },
   {
     id: 's3',
@@ -74,6 +100,7 @@ export const students: Student[] = [
     department: 'Computer Science',
     year: 3,
     advisorId: '4',
+    sectionId: 'sec1',
   },
   {
     id: 's4',
@@ -82,6 +109,7 @@ export const students: Student[] = [
     department: 'Computer Science',
     year: 2,
     advisorId: '5',
+    sectionId: 'sec2',
   },
   {
     id: 's5',
@@ -90,6 +118,7 @@ export const students: Student[] = [
     department: 'Computer Science',
     year: 2,
     advisorId: '5',
+    sectionId: 'sec2',
   },
   {
     id: 's6',
@@ -98,6 +127,7 @@ export const students: Student[] = [
     department: 'Electrical Engineering',
     year: 3,
     advisorId: '6',
+    sectionId: 'sec3',
   },
   {
     id: 's7',
@@ -106,6 +136,7 @@ export const students: Student[] = [
     department: 'Electrical Engineering',
     year: 3,
     advisorId: '6',
+    sectionId: 'sec3',
   },
   {
     id: 's8',
@@ -114,6 +145,7 @@ export const students: Student[] = [
     department: 'Electrical Engineering',
     year: 2,
     advisorId: '6',
+    sectionId: 'sec3',
   },
 ];
 

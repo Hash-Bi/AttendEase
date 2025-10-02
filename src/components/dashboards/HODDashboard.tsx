@@ -2,12 +2,15 @@ import { useState } from 'react';
 import { Users, CheckCircle, XCircle, Clock, TrendingUp } from 'lucide-react';
 import { Header } from '../shared/Header';
 import { StatsCard } from '../shared/StatsCard';
+import { AdvisorManagement } from '../advisors/AdvisorManagement';
+import { SectionManagement } from '../sections/SectionManagement';
 import { dataService } from '../../services/dataService';
 import { useAuth } from '../../context/AuthContext';
 
 export function HODDashboard() {
   const { user } = useAuth();
   const [selectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const deptStudents = dataService.getStudents(user!.id, user!.role, user!.department);
   const todayAttendance = dataService.getAttendanceRecords(
@@ -35,6 +38,10 @@ export function HODDashboard() {
       advisorName: dataService.getAdvisorName(student.advisorId),
     };
   });
+
+  const handleManagementChange = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -71,6 +78,19 @@ export function HODDashboard() {
             value={lateCount}
             icon={Clock}
             color="amber"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-8 mb-8">
+          <AdvisorManagement
+            key={`advisors-${refreshKey}`}
+            department={user!.department!}
+            onAdvisorChange={handleManagementChange}
+          />
+          <SectionManagement
+            key={`sections-${refreshKey}`}
+            department={user!.department!}
+            onSectionChange={handleManagementChange}
           />
         </div>
 

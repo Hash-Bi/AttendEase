@@ -9,6 +9,14 @@ export interface User {
   department?: string;
 }
 
+export interface Section {
+  id: string;
+  name: string;
+  department: string;
+  year: number;
+  advisorId: string;
+}
+
 export interface Student {
   id: string;
   rollNumber: string;
@@ -16,6 +24,7 @@ export interface Student {
   department: string;
   year: number;
   advisorId: string;
+  sectionId?: string;
 }
 
 export interface AttendanceRecord {
